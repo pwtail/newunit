@@ -1,0 +1,36 @@
+{
+  "routes": {
+    "proj.urls": [
+      {
+        "match": {
+          "uri": "~^/extra/*"
+        },
+        "action": {
+          "pass": "routes/proj.extra_urls"
+        }
+      },
+      {
+        "action": {
+          "pass": "applications/nereids"
+        }
+      }
+    ],
+    "proj.extra_urls": [
+      {
+        "match": {
+          "uri": [
+            "~^/extra/hi/$"
+          ]
+        },
+        "action": {
+          "pass": "applications/hesperides"
+        }
+      },
+      {
+        "action": {
+          "pass": "applications/nereids"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+    "listeners":{
+        "*:8000":{
+            "pass":"routes/proj.urls"
+        }
+    },
+    "routes": {},
+
+    "applications":{
+        "nereids":{
+            "type":"python 3",
+            "protocol": "wsgi",
+            "path":"/app",
+            "module": "proj.wsgi",
+             "callable": "application"
+        },
+        "hesperides":{
+            "type":"python 3",
+            "protocol": "asgi",
+            "path":"/app",
+            "module": "proj.asgi",
+             "callable": "application"
+        }
+    }
+}
