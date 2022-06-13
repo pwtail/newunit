@@ -11,7 +11,7 @@
       },
       {
         "action": {
-          "pass": "applications/nereids"
+          "pass": "applications/sync"
         }
       }
     ],
@@ -23,12 +23,12 @@
           ]
         },
         "action": {
-          "pass": "applications/hesperides"
+          "pass": "applications/async"
         }
       },
       {
         "action": {
-          "pass": "applications/nereids"
+          "pass": "applications/sync"
         }
       }
     ]

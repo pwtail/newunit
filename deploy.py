@@ -1,4 +1,4 @@
-import inspect
+import json
 import json
 import os
 import sys
@@ -6,91 +6,14 @@ from asyncio import iscoroutinefunction
 from dataclasses import dataclass
 
 import django
-from django.core.handlers.asgi import ASGIRequest
 from django.urls import get_resolver
 from django.urls.resolvers import RoutePattern, URLPattern, URLResolver
-from django.utils.module_loading import import_string
-
-
-
-
-def wrap(fn):
-    assert not getattr(fn, 'wrapped', None)
-    if not inspect.isfunction(fn):
-        return fn
-
-    def wrapper(request):
-        assert isinstance(request, ASGIRequest) == iscoroutinefunction(fn)
-        return fn(request)
-
-    return wrapper
-
-
-def wrap_all():
-    for fn, tup in get_resolver().reverse_dict.items():
-        new_fn = wrap(fn)
-        try:
-            mod = import_string(fn.__module__)
-        except Exception as ex:
-            if fn == 'redoc':
-                1
-        if getattr(mod, fn.__name__, None) is fn:
-            setattr(mod, fn.__name__, new_fn)
-
-
-"""
-nymph.urls
-get_path()  .urls
-
-"""
-
-
-# асинх. урлы только в модулях
-
-def render_urls(path, urlconf_module, result=None):
-    if result is None:
-        result = {}
-    name = urlconf_module.__name__
-    uris = []
-    for url in urlconf_module.urlpatterns:
-        if not url.callback or not iscoroutinefunction(url.callback):
-            continue
-        route = ''.join(path, url.pattern._route)
-        pattern = RoutePattern(route, is_endpoint=True)
-        uris.append(f"~{pattern.regex}")
-
-    return {
-        name: [
-            {
-                "match": {
-                    "uri": uris,
-                },
-                "action": {
-                    "pass": "applications/hesperides",
-                }
-            }
-        ]
-    }
 
 
 @dataclass
 class UrlModule:
     path: str
     module: object
-
-    # @classmethod
-    # def _collect(cls, path='', resolver=None, result=None):
-    #     if resolver is None:
-    #         resolver = get_resolver()
-    #     if result is None:
-    #         result = {}
-    #     if isinstance(resolver.urlconf_module, ModuleType):
-    #         yield UrlModule(path, resolver.urlconf_module)
-    #     for url in resolver.url_patterns:
-    #         if isinstance(url, URLPattern):
-    #             continue
-    #         new_path = ''.join((path, url.pattern._route))
-    #         yield from cls._collect(new_path, url)
 
     @classmethod
     def _collect(cls, path='/', resolver=None, result=None):
@@ -105,7 +28,7 @@ class UrlModule:
             yield from result
             del result[:]
         for url in resolver.url_patterns:
-            if not isinstance(url, URLPattern) and isinstance(url, URLResolver):
+            if isinstance(url, URLResolver):
                 new_path = ''.join((path, url.pattern._route))
                 yield from cls._collect(new_path, url, result=result)
 
@@ -143,8 +66,11 @@ class UrlModule:
             elif isinstance(url, URLResolver) and isinstance(mod := url.urlconf_module, ModuleType):
                 pattern = RoutePattern(route)
                 if mod in modules:
+                    name = mod.__name__
+                    if name.endswith('.urls'):
+                        name = name[:-5]
                     items.update({
-                        self.module.__name__: [{
+                        name: [{
                             "match": {
                                 "uri": f"~{pattern.regex.pattern}",
                             },
@@ -153,28 +79,31 @@ class UrlModule:
                             }
                         }, {
                             "action": {
-                                "pass": "applications/nereids",
+                                "pass": "applications/sync",
                             }
                         }]})
+        name = self.module.__name__
+        if name.endswith('.urls'):
+            name = name[:-5]
         if uris:
-            name = self.module.__name__
-            items.update({
-                name: [
-                    {
-                        "match": {
-                            "uri": uris,
-                        },
-                        "action": {
-                            "pass": "applications/hesperides",
-                        }
+            routes = [
+                {
+                    "match": {
+                        "uri": uris,
                     },
-                    {
-                        "action": {
-                            "pass": "applications/nereids",
-                        }
+                    "action": {
+                        "pass": "applications/async",
                     }
-                ]
-            })
+                },
+            ]
+        else:
+            routes = []
+        routes.append({
+            "action": {
+                "pass": "applications/sync",
+            }
+        })
+        items.update({name: routes})
         return items
 
 

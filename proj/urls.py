@@ -18,7 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 def yo(request):
-    return HttpResponse(str(request))
+    text = str(request).strip('<>')
+    return HttpResponse(text)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -1,20 +1,20 @@
 {
     "listeners":{
         "*:8000":{
-            "pass":"routes/proj.urls"
+            "pass":"routes/proj"
         }
     },
     "routes": {},
 
     "applications":{
-        "nereids":{
+        "sync":{
             "type":"python 3",
             "protocol": "wsgi",
             "path":"/app",
             "module": "proj.wsgi",
              "callable": "application"
         },
-        "hesperides":{
+        "async":{
             "type":"python 3",
             "protocol": "asgi",
             "path":"/app",
