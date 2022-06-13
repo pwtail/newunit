@@ -39,8 +39,6 @@ class UrlModule:
     def collect(cls):
         return list(cls._collect())
 
-    # TODO routes/
-
     @staticmethod
     def is_async_endpoint(url):
         return isinstance(url, URLPattern) and iscoroutinefunction(url.callback)
@@ -57,55 +55,59 @@ class UrlModule:
 
     def render(self, modules):
         uris = []
-        items = {}
+
+        routes = []
+        # named + plain
+
         for url in self.module.urlpatterns:
             route = ''.join((self.path, url.pattern._route))
             if self.is_async_endpoint(url):
                 pattern = RoutePattern(route)
                 uris.append(f"~{pattern.regex.pattern}$")
-            elif isinstance(url, URLResolver) and isinstance(mod := url.urlconf_module, ModuleType):
+            elif isinstance(url, URLResolver):
+                if not  isinstance(mod := url.urlconf_module, ModuleType):
+                    # a hack
+                    continue
                 pattern = RoutePattern(route)
                 if mod in modules:
                     name = mod.__name__
                     if name.endswith('.urls'):
                         name = name[:-5]
-                    items.update({
-                        name: [{
-                            "match": {
-                                "uri": f"~{pattern.regex.pattern}",
-                            },
-                            "action": {
-                                "pass": f"routes/{mod.__name__}",
-                            }
-                        }, {
-                            "action": {
-                                "pass": "applications/sync",
-                            }
-                        }]})
-        name = self.module.__name__
-        if name.endswith('.urls'):
-            name = name[:-5]
+                    routes.append({
+                        "match": {
+                            "uri": f"~{pattern.regex.pattern}",
+                        },
+                        "action": {
+                            "pass": f"routes/{name}",
+                        },
+                    })
         if uris:
-            routes = [
-                {
-                    "match": {
-                        "uri": uris,
-                    },
-                    "action": {
-                        "pass": "applications/async",
-                    }
+            routes.append({
+                "match": {
+                    "uri": uris,
                 },
-            ]
-        else:
-            routes = []
+                "action": {
+                    "pass": "applications/async",
+                }
+            })
         routes.append({
             "action": {
                 "pass": "applications/sync",
             }
         })
-        items.update({name: routes})
-        return items
+        name = self.module.__name__
+        if name.endswith('.urls'):
+            name = name[:-5]
+        return {name: routes}
 
+    @classmethod
+    def _iterate(cls, url_patterns):
+        for url in url_patterns:
+            route = ''.join((self.path, url.pattern._route))
+            if self.is_async_endpoint(url):
+                yield url
+            elif isinstance(url, URLResolver) and isinstance(mod := url.urlconf_module, ModuleType):
+                pattern = RoutePattern(route)
 
 ModuleType = type(django)
 
