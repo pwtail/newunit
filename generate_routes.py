@@ -87,12 +87,12 @@ class UrlModule:
                     "uri": uris,
                 },
                 "action": {
-                    "pass": "applications/async",
+                    "pass": "applications/asgi",
                 }
             })
         routes.append({
             "action": {
-                "pass": "applications/sync",
+                "pass": "applications/wsgi",
             }
         })
         name = self.module.__name__
@@ -100,18 +100,9 @@ class UrlModule:
             name = name[:-5]
         return {name: routes}
 
-    @classmethod
-    def _iterate(cls, url_patterns):
-        for url in url_patterns:
-            route = ''.join((self.path, url.pattern._route))
-            if self.is_async_endpoint(url):
-                yield url
-            elif isinstance(url, URLResolver) and isinstance(mod := url.urlconf_module, ModuleType):
-                pattern = RoutePattern(route)
 
 ModuleType = type(django)
 
-1
 
 if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'proj.settings')

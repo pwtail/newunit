@@ -7,19 +7,19 @@
     "routes": {},
 
     "applications":{
-        "sync":{
+        "wsgi":{
             "type":"python 3",
             "protocol": "wsgi",
             "path":"/app",
             "module": "proj.wsgi",
              "callable": "application"
         },
-        "async":{
+        "asgi":{
             "type":"python 3",
             "protocol": "asgi",
             "path":"/app",
             "module": "proj.asgi",
-             "callable": "application"
+            "callable": "application"
         }
     }
 }

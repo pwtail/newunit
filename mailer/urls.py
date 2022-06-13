@@ -6,12 +6,12 @@ from django.urls import path, include
 
 import mailer.check_urls
 
-from django.http import JsonResponse
+from proj.util import check_request
 
 
 async def send_letter(request):
     await asyncio.sleep(0.5)
-    return JsonResponse({'sent': True})
+    return check_request(request)
 
 
 urlpatterns = [

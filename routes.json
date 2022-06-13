@@ -1,34 +1,59 @@
 {
   "routes": {
-    "proj.urls": [
+    "proj": [
       {
         "match": {
-          "uri": "~^/extra/*"
+          "uri": "~^/mail/"
         },
         "action": {
-          "pass": "routes/proj.extra_urls"
+          "pass": "routes/mailer"
         }
       },
       {
         "action": {
-          "pass": "applications/sync"
+          "pass": "applications/wsgi"
         }
       }
     ],
-    "proj.extra_urls": [
+    "mailer": [
+      {
+        "match": {
+          "uri": "~^/mail/check/"
+        },
+        "action": {
+          "pass": "routes/mailer.check_urls"
+        }
+      },
       {
         "match": {
           "uri": [
-            "~^/extra/hi/$"
+            "~^/mail/send/$"
           ]
         },
         "action": {
-          "pass": "applications/async"
+          "pass": "applications/asgi"
         }
       },
       {
         "action": {
-          "pass": "applications/sync"
+          "pass": "applications/wsgi"
+        }
+      }
+    ],
+    "mailer.check_urls": [
+      {
+        "match": {
+          "uri": [
+            "~^/mail/check/notify/$"
+          ]
+        },
+        "action": {
+          "pass": "applications/asgi"
+        }
+      },
+      {
+        "action": {
+          "pass": "applications/wsgi"
         }
       }
     ]
