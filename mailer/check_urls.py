@@ -15,6 +15,6 @@ async def notify_about_mail(request):
 
 
 urlpatterns = [
-    path('check/', check_mail),
+    path('all/', check_mail),
     path('notify/', notify_about_mail),
 ]

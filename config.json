@@ -12,7 +12,7 @@
             "protocol": "wsgi",
             "path":"/app",
             "module": "proj.wsgi",
-             "callable": "application"
+            "callable": "application"
         },
         "asgi":{
             "type":"python 3",
