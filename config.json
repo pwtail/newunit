@@ -1,11 +1,17 @@
 {
+    "settings": {
+        "http": {
+            "max_body_size": 104857600
+        }
+    },
     "listeners":{
         "*:8000":{
             "pass":"routes/proj"
         }
     },
-    "routes": {},
+    "routes": {
 
+    },
     "applications":{
         "wsgi":{
             "type":"python 3",
