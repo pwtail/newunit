@@ -9,7 +9,7 @@ WORKDIR /app
 
 RUN python -m pip install django psycopg2
 
-COPY proj /app
+COPY . /app
 
 RUN python -m generate_routes | jq "." > /app/routes.json
 
